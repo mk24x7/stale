@@ -12,5 +12,10 @@ let package = Package(
             name: "StaleCore",
             path: "Sources/StaleCore"
         ),
+        .testTarget(
+            name: "StaleCoreTests",
+            dependencies: ["StaleCore"],
+            path: "Tests/StaleCoreTests"
+        ),
     ]
 )
