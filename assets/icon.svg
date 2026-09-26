@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Stale / Flat 2: git branch whose last commit is a hollow, unpushed loose end -->
+  <rect width="1024" height="1024" fill="#E07A5F"/>
+  <g fill="none" stroke="#FFF6EC" stroke-width="56" stroke-linecap="round">
+    <line x1="384" y1="290" x2="384" y2="740"/>
+    <path d="M384 740 C384 580 640 610 640 474"/>
+  </g>
+  <circle cx="384" cy="290" r="70" fill="#FFF6EC"/>
+  <circle cx="384" cy="740" r="70" fill="#FFF6EC"/>
+  <circle cx="640" cy="404" r="68" fill="#E07A5F" stroke="#FFE066" stroke-width="46"/>
+</svg>
