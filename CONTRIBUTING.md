@@ -33,6 +33,35 @@ swift test
 
 Tests create repositories in temporary folders with the system git, isolated from your global git configuration. CI runs the same command plus `shellcheck` and `scripts/check-ascii.sh`.
 
+## Screenshots
+
+The app has a hidden snapshot mode that renders the UI offscreen and quits, so
+the README screenshot can be regenerated without screen recording permission.
+`scripts/snapshot.sh` builds a throwaway fixture of demo repositories and runs
+it:
+
+```sh
+./build.sh
+SNAPSHOT_DIR=/tmp/stale-shots scripts/snapshot.sh
+# review /tmp/stale-shots/results.png, then:
+cp /tmp/stale-shots/results.png assets/results.png
+```
+
+- `STALE_SNAPSHOT_DIR` turns the mode on and is where `landing.png` and
+  `results.png` are written (2x, 1560x1280 px for the default 780x640 pt window).
+- `STALE_SNAPSHOT_ROOT` is the folder to scan. It is required: snapshot mode
+  refuses to run without it, so the real home folder is never scanned. Paths are
+  shown relative to its parent folder, so `<fixture>/Code` reads as `~/Code`.
+
+The fixture (`<tmp>/Code`) holds eight repositories with generic names in mixed
+states: unpushed commits, a branch with no upstream, uncommitted and staged
+changes, untracked files, a stash, a repository with no remote and two clean
+ones. Their remotes are bare repositories in `<tmp>/remotes`, outside the
+scanned folder, and every commit uses a demo identity with git isolated from
+your global configuration. Snapshot mode forces the dark appearance, only runs
+the usual read-only scan and does not change the saved nested-repositories
+setting.
+
 ## Rules for the engine
 
 - Read-only. Only git subcommands that never write are allowed (`status`, `for-each-ref`, `stash list`, `remote`, `rev-list`, `rev-parse`). No `fetch`, no `gc`, nothing that takes a lock. `GIT_OPTIONAL_LOCKS=0` stays on.

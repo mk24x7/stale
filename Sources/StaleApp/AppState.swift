@@ -34,7 +34,9 @@ final class AppState: ObservableObject {
     @Published var alertMessage: String?
 
     private var scanTask: Task<Void, Never>?
-    private let home = FileManager.default.homeDirectoryForCurrentUser
+    /// Home folder used to shorten paths to "~". Only snapshot mode changes it,
+    /// so the screenshot shows fixture paths as if they were under a home folder.
+    var home = FileManager.default.homeDirectoryForCurrentUser
 
     var atRisk: [RepoReport] { result?.atRisk ?? [] }
     var clean: [RepoReport] { result?.clean ?? [] }

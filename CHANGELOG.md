@@ -16,5 +16,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `stale` command-line tool with `--json`, `--only`, `--min-risk`, `--nested`, `--max-depth`, `--no-color`, `--version` and `--help`, and exit code 3 when at-risk work is found.
 - Stale macOS app: folder picker, nested repositories toggle, progress with cancel, results grouped by risk with a badge per finding, Reveal in Finder, Open in Terminal, Copy Report and Rescan.
 - Build, packaging and release tooling: universal app and CLI, zip, DMG and CLI tarball with checksums, CI and tagged releases, Homebrew formula and cask.
+- Hidden snapshot mode (`STALE_SNAPSHOT_DIR`, `STALE_SNAPSHOT_ROOT`) and `scripts/snapshot.sh`, which render the README screenshot from a fixture of demo repositories.
 
 [Unreleased]: https://github.com/mk24x7/stale/commits/main

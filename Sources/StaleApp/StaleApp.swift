@@ -11,6 +11,11 @@ struct StaleApp: App {
                 .environmentObject(appState)
                 .preferredColorScheme(.dark)
                 .frame(minWidth: 640, minHeight: 500)
+                .task {
+                    if Snapshot.directory != nil {
+                        await Snapshot.run(state: appState)
+                    }
+                }
         }
         .defaultSize(width: 780, height: 640)
         .windowStyle(.hiddenTitleBar)

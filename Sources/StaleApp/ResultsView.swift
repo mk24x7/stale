@@ -105,7 +105,7 @@ struct ResultsView: View {
                         Text(report.name)
                             .font(.system(size: 11))
                             .foregroundColor(.secondary)
-                        Text(PathFormat.shorten(report.path.path))
+                        Text(PathFormat.shorten(report.path.path, home: state.home.path))
                             .font(.system(size: 10, design: .monospaced))
                             .foregroundColor(Theme.tertiary)
                             .lineLimit(1)
@@ -211,7 +211,7 @@ struct RepoRowView: View {
                             .foregroundColor(Theme.tertiary)
                     }
                 }
-                Text(PathFormat.shorten(report.path.path))
+                Text(PathFormat.shorten(report.path.path, home: state.home.path))
                     .font(.system(size: 11, design: .monospaced))
                     .foregroundColor(Theme.tertiary)
                     .lineLimit(1)
