@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  swift:
+    name: Swift build and test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # build.sh derives the build number from the commit count.
+          fetch-depth: 0
+
+      - name: Toolchain
+        run: |
+          sw_vers
+          xcodebuild -version
+          swift --version
+          /usr/bin/git --version
+
+      - name: Cache SwiftPM build directory
+        uses: actions/cache@v6
+        with:
+          path: .build
+          key: swiftpm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('Package.swift', 'Package.resolved', 'Sources/**') }}
+          restore-keys: |
+            swiftpm-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: swift build
+        run: swift build -c release
+
+      - name: swift test
+        run: swift test
+
+      - name: Assemble app bundle and CLI
+        run: ./build.sh
+        env:
+          OUT_DIR: dist
+
+      - name: Verify code signatures
+        run: |
+          codesign --verify --deep --strict --verbose=2 dist/Stale.app
+          codesign --verify --strict --verbose=2 dist/stale
+
+      - name: CLI smoke test
+        run: |
+          dist/stale --version
+          dist/stale --help > /dev/null
+          set +e
+          dist/stale --bogus 2>/dev/null
+          code=$?
+          set -e
+          if [ "$code" -ne 2 ]; then
+            echo "::error::expected exit code 2 for an unknown option, got $code"
+            exit 1
+          fi
+          # A clean repository with a pushed branch: exit 0 and nothing at risk.
+          work="$(mktemp -d)"
+          git init -q --bare "$work/origin.git"
+          git init -q -b main "$work/scan/app"
+          git -C "$work/scan/app" -c user.name=CI -c user.email=ci@example.com commit -q --allow-empty -m initial
+          git -C "$work/scan/app" remote add origin "$work/origin.git"
+          git -C "$work/scan/app" push -q -u origin main
+          dist/stale "$work/scan" --no-color
+          # An untracked file: exit 3 and one repository at risk in the JSON.
+          touch "$work/scan/app/notes.txt"
+          set +e
+          dist/stale "$work/scan" --json > "$work/out.json"
+          code=$?
+          set -e
+          /bin/cat "$work/out.json"
+          if [ "$code" -ne 3 ]; then
+            echo "::error::expected exit code 3 when work is at risk, got $code"
+            exit 1
+          fi
+          grep -q '"atRisk" : 1' "$work/out.json"
+
+      - name: Version parity
+        run: scripts/check-versions.sh
+
+  shell:
+    name: shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: shellcheck
+        run: |
+          shellcheck --version
+          shellcheck build.sh dmg.sh package.sh scripts/*.sh
+
+  hygiene:
+    name: Repository hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: ASCII only
+        run: scripts/check-ascii.sh
