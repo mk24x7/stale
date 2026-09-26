@@ -1,0 +1,19 @@
+# Swift
+.build/
+.swiftpm/
+*.xcodeproj/
+xcuserdata/
+DerivedData/
+Package.resolved
+
+# Build artifacts
+dist/
+*.app
+*.dmg
+*.zip
+*.tar.gz
+SHA256SUMS.txt
+
+# macOS
+.DS_Store
+*.dSYM/
