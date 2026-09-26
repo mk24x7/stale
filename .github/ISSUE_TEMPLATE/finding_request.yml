@@ -1,0 +1,42 @@
+name: Finding request
+description: Suggest another kind of git work that can exist only on this disk.
+labels: ["finding"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Stale reports work that would be lost if the disk died. Proposals must be detectable with read-only
+        git commands that never touch the network.
+  - type: input
+    id: situation
+    attributes:
+      label: Situation
+      description: What the user did that leaves work on this disk only.
+      placeholder: Commits on a tag that no branch or remote contains
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: git commands that create it
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: detect
+    attributes:
+      label: Read-only command that detects it
+      description: The git command Stale would run, and how its output shows the problem.
+      render: text
+    validations:
+      required: true
+  - type: dropdown
+    id: risk
+    attributes:
+      label: Suggested risk
+      options:
+        - High (commits exist nowhere else)
+        - Medium (uncommitted changes)
+        - Low (untracked files)
+    validations:
+      required: true

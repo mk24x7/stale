@@ -1,0 +1,78 @@
+name: Bug report
+description: Something in the Stale app or CLI does not work as expected.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If Stale changed a repository in any way (index, refs, working tree, remote), do not file a public issue.
+        Report it privately as described in SECURITY.md.
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - macOS app
+        - CLI
+        - Both
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Stale version
+      description: App > About Stale, or `stale --version`.
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: macOS 26.2
+    validations:
+      required: true
+  - type: input
+    id: git
+    attributes:
+      label: git version
+      description: Output of `/usr/bin/git --version`.
+      placeholder: git version 2.50.1 (Apple Git-155)
+    validations:
+      required: true
+  - type: input
+    id: install
+    attributes:
+      label: Installation method
+      placeholder: Homebrew formula, Homebrew cask, DMG, CLI tarball, built from source
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: Include the exact error message, or the line Stale printed for the repository.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+      description: For a wrong finding, include the output of `git status -sb`, `git branch -vv` and `git stash list` in that repository.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The smallest set of git commands that recreate the repository state, and the stale command line.
+      placeholder: |
+        1. git init demo && cd demo && git commit --allow-empty -m one
+        2. stale .. --json
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant output
+      description: CLI output (text or --json). Remove anything private.
+      render: text
