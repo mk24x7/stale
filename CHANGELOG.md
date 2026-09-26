@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-09-26
+
 ### Added
 
 - `StaleCore` engine: an iterative walk that finds git repositories (working trees, linked worktrees and bare repositories) under a folder, skipping dependency and build folders, symlinks and app bundles, with a depth limit, task cancellation and a count of folders that could not be read.
@@ -18,4 +20,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Build, packaging and release tooling: universal app and CLI, zip, DMG and CLI tarball with checksums, CI and tagged releases, Homebrew formula and cask.
 - Hidden snapshot mode (`STALE_SNAPSHOT_DIR`, `STALE_SNAPSHOT_ROOT`) and `scripts/snapshot.sh`, which render the README screenshot from a fixture of demo repositories.
 
-[Unreleased]: https://github.com/mk24x7/stale/commits/main
+[Unreleased]: https://github.com/mk24x7/stale/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/mk24x7/stale/releases/tag/v1.0.0
