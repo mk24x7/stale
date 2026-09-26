@@ -1,0 +1,86 @@
+#!/bin/bash
+# Package a built Stale.app and stale CLI into release artifacts.
+#
+# Environment:
+#   VERSION      release version used in artifact names (default: VERSION file)
+#   OUT_DIR      directory that contains Stale.app and stale and receives the
+#                artifacts (default: dist)
+#   ALLOW_THIN   set to 1 to package single-architecture binaries (local
+#                testing); by default both must contain arm64 and x86_64
+#
+# Produces, in OUT_DIR:
+#   Stale-$VERSION-macos-universal.zip       the app
+#   Stale-$VERSION-macos-universal.dmg       the app with an /Applications link
+#   stale-$VERSION-macos-universal.tar.gz    the CLI, LICENSE and README
+#   SHA256SUMS.txt
+set -euo pipefail
+
+cd "$(dirname "$0")"
+
+VERSION="${VERSION:-$(tr -d '[:space:]' < VERSION)}"
+OUT_DIR="${OUT_DIR:-dist}"
+APP_PATH="$OUT_DIR/Stale.app"
+CLI_PATH="$OUT_DIR/stale"
+BASE_NAME="Stale-$VERSION-macos-universal"
+ZIP_NAME="$BASE_NAME.zip"
+DMG_NAME="$BASE_NAME.dmg"
+CLI_BASE="stale-$VERSION-macos-universal"
+TAR_NAME="$CLI_BASE.tar.gz"
+
+if [ -z "$VERSION" ]; then
+    echo "error: VERSION is empty" >&2
+    exit 1
+fi
+
+if [ ! -d "$APP_PATH" ]; then
+    echo "error: '$APP_PATH' not found. Run ./build.sh first." >&2
+    exit 1
+fi
+if [ ! -x "$CLI_PATH" ]; then
+    echo "error: '$CLI_PATH' not found. Run ./build.sh first." >&2
+    exit 1
+fi
+
+for binary in "$APP_PATH/Contents/MacOS/Stale" "$CLI_PATH"; do
+    ARCHS_FOUND="$(lipo -archs "$binary")"
+    echo "$binary: $ARCHS_FOUND"
+    for arch in arm64 x86_64; do
+        case " $ARCHS_FOUND " in
+            *" $arch "*) ;;
+            *)
+                if [ "${ALLOW_THIN:-0}" != "1" ]; then
+                    echo "error: $binary lacks $arch; build with ARCHS=\"arm64 x86_64\" or set ALLOW_THIN=1" >&2
+                    exit 1
+                fi
+                echo "warning: $binary lacks $arch (ALLOW_THIN=1)" >&2
+                ;;
+        esac
+    done
+done
+
+codesign --verify --deep --strict "$APP_PATH"
+codesign --verify --strict "$CLI_PATH"
+
+rm -f "$OUT_DIR/$ZIP_NAME" "$OUT_DIR/$DMG_NAME" "$OUT_DIR/$TAR_NAME" "$OUT_DIR/SHA256SUMS.txt"
+
+echo "Creating $OUT_DIR/$ZIP_NAME..."
+ditto -c -k --keepParent "$APP_PATH" "$OUT_DIR/$ZIP_NAME"
+
+APP_DIR="$OUT_DIR" DMG_NAME="$DMG_NAME" ./dmg.sh
+
+echo "Creating $OUT_DIR/$TAR_NAME..."
+STAGING="$(mktemp -d "${TMPDIR:-/tmp}/stale-cli.XXXXXX")"
+trap 'rm -rf "$STAGING"' EXIT
+mkdir -p "$STAGING/$CLI_BASE"
+cp "$CLI_PATH" "$STAGING/$CLI_BASE/stale"
+cp LICENSE README.md "$STAGING/$CLI_BASE/"
+# COPYFILE_DISABLE keeps macOS extended attributes (._ files) out of the tarball.
+COPYFILE_DISABLE=1 tar -czf "$OUT_DIR/$TAR_NAME" -C "$STAGING" "$CLI_BASE"
+
+(
+    cd "$OUT_DIR"
+    shasum -a 256 "$ZIP_NAME" "$DMG_NAME" "$TAR_NAME" > SHA256SUMS.txt
+    echo ""
+    echo "SHA256SUMS.txt:"
+    /bin/cat SHA256SUMS.txt
+)
